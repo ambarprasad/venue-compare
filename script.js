@@ -470,42 +470,97 @@ async function loadBusynessData(placeId, elementId) {
     const element = document.getElementById(elementId);
     if (!element) return;
 
+    console.group(`🔍 Loading busyness data for place: ${placeId}`);
+    
     element.className = 'busyness';
     element.textContent = 'Loading...';
 
     try {
-        const response = await fetch(
-            `https://busyness-api-575381598315.us-central1.run.app/busyness/live?place_id=${encodeURIComponent(placeId)}`, 
-            { cache: 'no-store' }
-        );
+        // Your Cloud Run URL (replace with actual URL)
+        const apiUrl = `https://busyness-api-[YOUR-HASH]-uc.a.run.app/busyness/live?place_id=${encodeURIComponent(placeId)}`;
+        
+        console.log('📤 Making request to:', apiUrl);
+        console.log('📋 Request parameters:', {
+            place_id: placeId,
+            encoded_place_id: encodeURIComponent(placeId),
+            element_id: elementId,
+            timestamp: new Date().toISOString()
+        });
+
+        // Record start time for performance tracking
+        const startTime = performance.now();
+        
+        const response = await fetch(apiUrl, { 
+            cache: 'no-store',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        
+        const endTime = performance.now();
+        const requestDuration = Math.round(endTime - startTime);
+        
+        console.log('📥 Response received:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            duration_ms: requestDuration,
+            headers: Object.fromEntries(response.headers.entries()),
+            url: response.url
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log('Worker response:', data); // Keep this for debugging
+        
+        console.log('📦 API Response Data:', {
+            raw_response: data,
+            current_busyness: data.currentBusyness,
+            busyness_level: data.busynessLevel,
+            place_id: data.placeId,
+            last_updated: data.lastUpdated,
+            source: data.source || 'live_data',
+            has_error: !!data.error
+        });
 
-        // Your Worker returns: { currentBusyness: number, busynessLevel: 'low'|'medium'|'high' }
-        let busynessScore = data.currentBusyness;
-        let level = data.busynessLevel;
-
-        // Fallback if the expected structure isn't there
-        if (typeof busynessScore !== 'number') {
-            busynessScore = Math.floor(Math.random() * 100); // Temporary fallback
-            level = busynessScore < 34 ? 'low' : busynessScore < 67 ? 'medium' : 'high';
-        }
-
+        // Process the response
+        const level = data.busynessLevel || 'low';
         const label = level.charAt(0).toUpperCase() + level.slice(1);
+        
+        console.log('🎨 Updating UI:', {
+            element_id: elementId,
+            css_class: `busyness ${level}`,
+            display_text: `${label} Traffic`,
+            busyness_score: data.currentBusyness
+        });
+
         element.className = `busyness ${level}`;
         element.textContent = `${label} Traffic`;
         
+        console.log('✅ Successfully loaded busyness data');
+        
     } catch (error) {
-        console.error('Busyness data error:', error);
+        console.error('❌ Busyness data error:', {
+            error_type: error.constructor.name,
+            error_message: error.message,
+            error_stack: error.stack,
+            place_id: placeId,
+            element_id: elementId,
+            timestamp: new Date().toISOString()
+        });
+        
         element.className = 'busyness';
         element.textContent = 'N/A';
+        
+        console.log('🔄 Set fallback UI state');
     }
+    
+    console.groupEnd();
 }
+
 
 
 
@@ -667,3 +722,32 @@ if (document.readyState === 'loading') {
 } else {
     loadGoogleMapsAPI();
 }
+// Add this debug function to help trace the complete flow
+function debugPlaceSearch(place, index) {
+    console.group(`🏢 Processing place: ${place.name}`);
+    console.log('Place data:', {
+        name: place.name,
+        place_id: place.place_id,
+        formatted_address: place.formatted_address,
+        rating: place.rating,
+        types: place.types,
+        geometry: place.geometry
+    });
+    
+    // This will trigger the loadBusynessData function with debug logs
+    loadBusynessData(place.place_id, `busyness-${index}`);
+    
+    console.groupEnd();
+}
+
+// Update your place card creation to use the debug function
+function createPlaceCard(place, index) {
+    const card = document.createElement('div');
+    card.className = 'place-card';
+    
+    // Debug the place processing
+    debugPlaceSearch(place, index);
+    
+    // ... rest of your existing createPlaceCard code
+}
+
