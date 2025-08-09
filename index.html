@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Place Finder</h1>
+            <div class="header-controls">
+                <button id="refresh-btn" class="refresh-btn" style="display: none;">
+                    <span class="refresh-icon">↻</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Location Section -->
+    <section class="location-section">
+        <div class="location-toggle">
+            <button id="use-location-btn" class="location-btn active">Use My Location</button>
+            <button id="search-location-btn" class="location-btn">Search Location</button>
+        </div>
+        
+        <div id="location-search" class="location-search hidden">
+            <input type="text" id="location-input" placeholder="Enter address or place name">
+            <button id="set-location-btn">Set Location</button>
+        </div>
+        
+        <div id="current-location" class="current-location">
+            <span id="location-text">Getting your location...</span>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section id="comparison-section" class="comparison-section hidden">
+        <h2>Compare Places (<span id="compare-count">0</span>/4)</h2>
+        <div id="comparison-grid" class="comparison-grid"></div>
+        <button id="compare-btn" class="compare-btn" disabled>Compare</button>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search for places..." disabled>
+            <button id="search-btn" disabled>Search</button>
+        </div>
+    </section>
+
+    <!-- Transport Toggle -->
+    <section class="transport-section">
+        <div class="transport-toggle">
+            <button id="driving-btn" class="transport-btn active">🚗 Driving</button>
+            <button id="walking-btn" class="transport-btn">🚶 Walking</button>
+        </div>
+    </section>
+
+    <!-- Search Results -->
+    <section id="search-results" class="search-results hidden">
+        <h2>Search Results</h2>
+        <div id="results-list" class="results-list"></div>
+    </section>
+
+    
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Place Details Modal -->
+    <div id="place-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Busyness Chart Modal -->
+    <div id="chart-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="chart-container"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
