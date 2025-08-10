@@ -587,7 +587,7 @@ async function loadBusynessData(placeId, elementId) {
 
     try {
         // Your Cloud Run URL (replace with actual URL)
-        const apiUrl = `https://busyness-api-[YOUR-HASH]-uc.a.run.app/busyness/live?place_id=${encodeURIComponent(placeId)}`;
+        const apiUrl = `https://busyness-api-575381598315.us-central1.run.app/busyness/live?place_id=${encodeURIComponent(placeId)}`;
         
         console.log('📤 Making request to:', apiUrl);
         console.log('📋 Request parameters:', {
