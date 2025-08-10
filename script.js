@@ -293,11 +293,51 @@ function createPlaceCard(place, index) {
     } catch (error) {
         console.error('Error in createPlaceCard:', error);
         card.innerHTML = `<p>Error loading place: ${place.name || 'Unknown'}</p>`;
+        return card;
     }
     
     // ALWAYS return the card element
     console.log(`Returning card:`, card, `Type:`, typeof card, `Is Element:`, card instanceof Element);
     return card;
+}
+
+function loadPlaceDetailsAsync(place, card, index) {
+    if (!place.place_id) return;
+    
+    // Get additional details from Google Places API
+    const service = new google.maps.places.PlacesService(document.createElement('div'));
+    service.getDetails({
+        placeId: place.place_id,
+        fields: ['name', 'rating', 'price_level', 'opening_hours', 'formatted_phone_number', 'geometry']
+    }, (details, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && details) {
+            updatePlaceCardAsync(card, place, details, index);
+        } else {
+            console.warn('Failed to get place details for:', place.place_id, status);
+        }
+    });
+}
+
+function updatePlaceCardAsync(cardElement, place, details, index) {
+    try {
+        const closingTime = getClosingTime(details.opening_hours);
+        const priceLevel = getPriceLevel(details.price_level);
+        
+        // Update specific elements instead of replacing innerHTML
+        const timeElement = cardElement.querySelector('.info-item:nth-child(2)');
+        const priceElement = cardElement.querySelector('.info-item:nth-child(3)');
+        
+        if (timeElement) timeElement.innerHTML = `🕒 Closes: ${closingTime}`;
+        if (priceElement) priceElement.innerHTML = `💰 ${priceLevel}`;
+        
+        // Load busyness data
+        if (details.geometry && details.geometry.location) {
+            loadBusynessData(place.place_id, `busyness-${index}`);
+        }
+        
+    } catch (error) {
+        console.error('Error updating place card:', error);
+    }
 }
 
 
