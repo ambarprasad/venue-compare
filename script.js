@@ -209,76 +209,46 @@ function displaySearchResults() {
         return;
     }
     
-    //searchResults.forEach((place, index) => {
-      //  try {
-        //    const card = createPlaceCard(place, index);
-            
-            // Verify card is a valid DOM element before appending
-          //  if (card && card instanceof HTMLElement) {
-            //    elements.resultsList.appendChild(card);
-            //} else {
-            //    console.error('createPlaceCard did not return a valid DOM element:', card);
-                // Create a fallback element
-              //  const fallbackCard = document.createElement('div');
-                //fallbackCard.className = 'place-card';
-                //fallbackCard.innerHTML = '<p>Error loading place information</p>';
-                //elements.resultsList.appendChild(fallbackCard);
-            //}
-        //} catch (error) {
-            //console.error('Error creating place card:', error, place);
-            // Continue with other places even if one fails
-        //}
-
-    //});
     searchResults.forEach((place, index) => {
         try {
-            const card = createSimpleCard(place, index); // Use simple version
+            const card = createPlaceCard(place, index);
+            
+            // Verify card is a valid DOM element before appending
             if (card && card instanceof HTMLElement) {
                 elements.resultsList.appendChild(card);
             } else {
-                console.error('createSimpleCard did not return a valid DOM element:', card);
+                console.error('createPlaceCard did not return a valid DOM element:', card);
+                // Create a fallback element
+                const fallbackCard = document.createElement('div');
+                fallbackCard.className = 'place-card';
+                fallbackCard.innerHTML = '<p>Error loading place information</p>';
+                elements.resultsList.appendChild(fallbackCard);
             }
         } catch (error) {
             console.error('Error creating place card:', error, place);
+            // Continue with other places even if one fails
         }
     });
 }
 
 
 function createPlaceCard(place, index) {
-    console.log(`=== START createPlaceCard for: ${place.name} ===`);
+    console.log(`Creating card for: ${place.name}, index: ${index}`);
     
-    let card;
+    const card = document.createElement('div');
+    card.className = 'place-card';
     
     try {
-        // Step 1: Create element
-        console.log('Step 1: Creating div element...');
-        card = document.createElement('div');
-        console.log('Step 1 SUCCESS: Created div element:', card);
-        
-        // Step 2: Set class
-        console.log('Step 2: Setting className...');
-        card.className = 'place-card';
-        console.log('Step 2 SUCCESS: Set className');
-        
-        // Step 3: Validate data
-        console.log('Step 3: Validating place data...');
         if (!place || !place.place_id) {
             console.warn('Invalid place data:', place);
             card.innerHTML = '<p>Invalid place data</p>';
             return card;
         }
-        console.log('Step 3 SUCCESS: Data is valid');
-        
-        // Step 4: Extract data safely
-        console.log('Step 4: Extracting place data...');
+
         const placeName = place.name || 'Unknown Place';
         const placeAddress = place.formatted_address || 'Address not available';
         const placeRating = place.rating || 'N/A';
-        console.log('Step 4 SUCCESS: Extracted data:', { placeName, placeRating });
         
-        // Step 5: Set innerHTML (this is likely where the error occurs)
-        console.log('Step 5: Setting innerHTML...');
         card.innerHTML = `
             <div class="place-header">
                 <div>
@@ -294,48 +264,39 @@ function createPlaceCard(place, index) {
                     <span class="busyness" id="busyness-${index}">Loading...</span>
                 </div>
             </div>
+            <div class="place-actions">
+                <button class="btn btn-primary" onclick="showPlaceDetails('${place.place_id}')">
+                    View Details
+                </button>
+                <button class="btn btn-success" onclick="callPlace('')">
+                    📞 Call
+                </button>
+                <button class="btn btn-info" onclick="showBusynessChart('${place.place_id}')">
+                    📊 Busyness
+                </button>
+                <button class="btn btn-primary" onclick="togglePlaceSelection(${index})">
+                    Add to Compare
+                </button>
+            </div>
         `;
-        console.log('Step 5 SUCCESS: Set innerHTML');
         
-        // Step 6: Schedule async loading
-        console.log('Step 6: Scheduling async loading...');
+        console.log(`Successfully created card for ${place.name}`);
+        
         setTimeout(() => {
-            console.log('Async: Loading details for', place.name);
-            // loadPlaceDetailsAsync(place, card, index);
+            loadPlaceDetailsAsync(place, card, index);
         }, 0);
-        console.log('Step 6 SUCCESS: Scheduled async loading');
         
     } catch (error) {
-        console.error('❌ ERROR in createPlaceCard at step:', error);
-        console.error('Error stack:', error.stack);
-        
-        // Ensure card exists before setting innerHTML
-        if (!card) {
-            console.error('Card element is null/undefined, creating fallback');
-            card = document.createElement('div');
-            card.className = 'place-card';
-        }
-        
+        console.error('Error in createPlaceCard:', error);
         card.innerHTML = `<p>Error loading place: ${place.name || 'Unknown'}</p>`;
-        console.log('Set error content, returning card:', card);
-        return card;
+        return card; // ✅ ADD THIS LINE - This was missing!
     }
     
-    console.log('=== FINAL: Returning card ===', card, typeof card);
+    console.log(`Returning card:`, card, `Type:`, typeof card, `Is Element:`, card instanceof Element);
     return card;
 }
-function createSimpleCard(place, index) {
-    console.log('Creating simple card for:', place.name);
-    
-    const div = document.createElement('div');
-    div.style.padding = '10px';
-    div.style.border = '1px solid #ccc';
-    div.style.margin = '5px';
-    div.textContent = place.name;
-    
-    console.log('Simple card created:', div);
-    return div;
-}
+
+
 
 function loadPlaceDetailsAsync(place, card, index) {
     if (!place.place_id) return;
@@ -887,16 +848,5 @@ function debugPlaceSearch(place, index) {
     loadBusynessData(place.place_id, `busyness-${index}`);
     
     console.groupEnd();
-}
-
-// Update your place card creation to use the debug function
-function createPlaceCard(place, index) {
-    const card = document.createElement('div');
-    card.className = 'place-card';
-    
-    // Debug the place processing
-    debugPlaceSearch(place, index);
-    
-    // ... rest of your existing createPlaceCard code
 }
 
