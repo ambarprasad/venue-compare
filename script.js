@@ -202,13 +202,35 @@ function searchPlaces() {
 
 function displaySearchResults() {
     elements.searchResults.classList.remove('hidden');
-    elements.resultsList.innerHTML = '';
+    elements.resultsList.innerHTML = ''; // Clear previous results
+    
+    if (!searchResults || searchResults.length === 0) {
+        elements.resultsList.innerHTML = '<p>No places found. Try a different search term.</p>';
+        return;
+    }
     
     searchResults.forEach((place, index) => {
-        const card = createPlaceCard(place, index);
-        elements.resultsList.appendChild(card);
+        try {
+            const card = createPlaceCard(place, index);
+            
+            // Verify card is a valid DOM element before appending
+            if (card && card instanceof HTMLElement) {
+                elements.resultsList.appendChild(card);
+            } else {
+                console.error('createPlaceCard did not return a valid DOM element:', card);
+                // Create a fallback element
+                const fallbackCard = document.createElement('div');
+                fallbackCard.className = 'place-card';
+                fallbackCard.innerHTML = '<p>Error loading place information</p>';
+                elements.resultsList.appendChild(fallbackCard);
+            }
+        } catch (error) {
+            console.error('Error creating place card:', error, place);
+            // Continue with other places even if one fails
+        }
     });
 }
+
 
 function createPlaceCard(place, index) {
     const card = document.createElement('div');
