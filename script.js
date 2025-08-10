@@ -233,22 +233,73 @@ function displaySearchResults() {
 
 
 function createPlaceCard(place, index) {
+    console.log(`Creating card for: ${place.name}, index: ${index}`);
+    
+    // Create the card element first - this should ALWAYS happen
     const card = document.createElement('div');
     card.className = 'place-card';
     
-    // Get place details
-    const service = new google.maps.places.PlacesService(document.createElement('div'));
-    service.getDetails({
-        placeId: place.place_id,
-        fields: ['name', 'rating', 'price_level', 'opening_hours', 'formatted_phone_number', 'geometry']
-    }, (details, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            updatePlaceCard(card, place, details, index);
+    try {
+        // Validate place data
+        if (!place || !place.place_id) {
+            console.warn('Invalid place data:', place);
+            card.innerHTML = '<p>Invalid place data</p>';
+            return card; // Return the card even with error content
         }
-    });
+
+        // Build card content safely
+        const placeName = place.name || 'Unknown Place';
+        const placeAddress = place.formatted_address || 'Address not available';
+        const placeRating = place.rating || 'N/A';
+        
+        card.innerHTML = `
+            <div class="place-header">
+                <div>
+                    <div class="place-name">${placeName}</div>
+                    <div class="place-rating">★ ${placeRating}</div>
+                </div>
+            </div>
+            <div class="place-info">
+                <div class="info-item">📍 ${placeAddress}</div>
+                <div class="info-item">🕒 Loading hours...</div>
+                <div class="info-item">💰 Loading price...</div>
+                <div class="info-item">
+                    <span class="busyness" id="busyness-${index}">Loading...</span>
+                </div>
+            </div>
+            <div class="place-actions">
+                <button class="btn btn-primary" onclick="showPlaceDetails('${place.place_id}')">
+                    View Details
+                </button>
+                <button class="btn btn-success" onclick="callPlace('')">
+                    📞 Call
+                </button>
+                <button class="btn btn-info" onclick="showBusynessChart('${place.place_id}')">
+                    📊 Busyness
+                </button>
+                <button class="btn btn-primary" onclick="togglePlaceSelection(${index})">
+                    Add to Compare
+                </button>
+            </div>
+        `;
+        
+        console.log(`Successfully created card for ${place.name}`);
+        
+        // Load additional details asynchronously (don't let this affect the return)
+        setTimeout(() => {
+            loadPlaceDetailsAsync(place, card, index);
+        }, 0);
+        
+    } catch (error) {
+        console.error('Error in createPlaceCard:', error);
+        card.innerHTML = `<p>Error loading place: ${place.name || 'Unknown'}</p>`;
+    }
     
+    // ALWAYS return the card element
+    console.log(`Returning card:`, card, `Type:`, typeof card, `Is Element:`, card instanceof Element);
     return card;
 }
+
 
 function updatePlaceCard(card, place, details, index) {
     const isSelected = selectedPlaces.some(p => p.place_id === place.place_id);
