@@ -3,35 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Finder</title>
+    <title>Venue Compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2196F3">
+    <meta name="theme-color" content="#7f5d5d">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <h1>Place Finder</h1>
-            <div class="header-controls">
-                <button id="refresh-btn" class="refresh-btn" style="display: none;">
-                    <span class="refresh-icon">↻</span>
-                </button>
-            </div>
+            <h1>Welcome to Ibiza, lads</h1>
         </div>
     </header>
 
     <!-- Location Section -->
     <section class="location-section">
         <div class="location-toggle">
-            <button id="use-location-btn" class="location-btn active">Use My Location</button>
-            <button id="search-location-btn" class="location-btn">Search Location</button>
+            <button id="use-location-btn" class="location-btn active"><i class="fas fa-location-arrow"></i> Use My Location</button>
+            <button id="search-location-btn" class="location-btn"><i class="fas fa-search"></i> Search Location</button>
         </div>
         
         <div id="location-search" class="location-search hidden">
             <input type="text" id="location-input" placeholder="Enter address or place name">
-            <button id="set-location-btn">Set Location</button>
+            <button id="set-location-btn"><i class="fas fa-check"></i> Set Location</button>
         </div>
         
         <div id="current-location" class="current-location">
@@ -43,22 +42,22 @@
     <section id="comparison-section" class="comparison-section hidden">
         <h2>Compare Places (<span id="compare-count">0</span>/4)</h2>
         <div id="comparison-grid" class="comparison-grid"></div>
-        <button id="compare-btn" class="compare-btn" disabled>Compare</button>
+        <button id="compare-btn" class="compare-btn" disabled><i class="fas fa-chart-bar"></i> Compare</button>
     </section>
 
     <!-- Search Section -->
     <section class="search-section">
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search for places..." disabled>
-            <button id="search-btn" disabled>Search</button>
+            <button id="search-btn" disabled><i class="fas fa-search"></i> Search</button>
         </div>
     </section>
 
     <!-- Transport Toggle -->
     <section class="transport-section">
         <div class="transport-toggle">
-            <button id="driving-btn" class="transport-btn active">🚗 Driving</button>
-            <button id="walking-btn" class="transport-btn">🚶 Walking</button>
+            <button id="driving-btn" class="transport-btn active"><i class="fas fa-car"></i> Driving</button>
+            <button id="walking-btn" class="transport-btn"><i class="fas fa-walking"></i> Walking</button>
         </div>
     </section>
 

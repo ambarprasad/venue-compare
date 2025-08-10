@@ -30,7 +30,7 @@ const elements = {
     comparisonGrid: document.getElementById('comparison-grid'),
     compareBtn: document.getElementById('compare-btn'),
     compareCount: document.getElementById('compare-count'),
-    refreshBtn: document.getElementById('refresh-btn'),
+
     loadingOverlay: document.getElementById('loading-overlay'),
     placeModal: document.getElementById('place-modal'),
     chartModal: document.getElementById('chart-modal')
@@ -75,7 +75,7 @@ function setupEventListeners() {
     
     // Comparison
     elements.compareBtn.addEventListener('click', compareSelectedPlaces);
-    elements.refreshBtn.addEventListener('click', refreshComparison);
+
     
     // Modal close
     document.querySelectorAll('.modal-close').forEach(closeBtn => {
@@ -169,10 +169,13 @@ function setTransportMode(mode) {
     elements.drivingBtn.classList.toggle('active', mode === 'driving');
     elements.walkingBtn.classList.toggle('active', mode === 'walking');
     
-    // Refresh travel times if places are selected
-    if (selectedPlaces.length > 0) {
-        refreshComparison();
-    }
+            // Refresh travel times if places are selected
+        if (selectedPlaces.length > 0) {
+            selectedPlaces.forEach((place, index) => {
+                loadBusynessData(place.place_id, `compare-busyness-${index}`);
+                calculateTravelTime(place.geometry.location, `travel-${index}`);
+            });
+        }
 }
 
 function searchPlaces() {
@@ -257,25 +260,22 @@ function createPlaceCard(place, index) {
                 </div>
             </div>
             <div class="place-info">
-                <div class="info-item">📍 ${placeAddress}</div>
-                <div class="info-item">🕒 Loading hours...</div>
-                <div class="info-item">💰 Loading price...</div>
+                <div class="info-item address"><i class="fas fa-map-marker-alt"></i> ${placeAddress}</div>
+                <div class="info-item"><i class="fas fa-clock"></i> Loading hours...</div>
+                <div class="info-item"><i class="fas fa-dollar-sign"></i> Loading price...</div>
                 <div class="info-item">
                     <span class="busyness" id="busyness-${index}">Loading...</span>
                 </div>
             </div>
             <div class="place-actions">
-                <button class="btn btn-primary" onclick="showPlaceDetails('${place.place_id}')">
-                    View Details
-                </button>
-                <button class="btn btn-success" onclick="callPlace('')">
-                    📞 Call
-                </button>
-                <button class="btn btn-info" onclick="showBusynessChart('${place.place_id}')">
-                    📊 Busyness
-                </button>
                 <button class="btn btn-primary" onclick="togglePlaceSelection(${index})">
-                    Add to Compare
+                    <i class="fas fa-plus"></i> Add
+                </button>
+                <button class="btn btn-outline" onclick="callPlace('')">
+                    <i class="fas fa-phone"></i> Call
+                </button>
+                <button class="btn btn-outline" onclick="showPlaceDetails('${place.place_id}')">
+                    <i class="fas fa-info-circle"></i> Details
                 </button>
             </div>
         `;
@@ -321,11 +321,13 @@ function updatePlaceCardAsync(cardElement, place, details, index) {
         const priceLevel = getPriceLevel(details.price_level);
         
         // Update specific elements instead of replacing innerHTML
+        const addressElement = cardElement.querySelector('.info-item:nth-child(1)');
         const timeElement = cardElement.querySelector('.info-item:nth-child(2)');
         const priceElement = cardElement.querySelector('.info-item:nth-child(3)');
         
-        if (timeElement) timeElement.innerHTML = `🕒 Closes: ${closingTime}`;
-        if (priceElement) priceElement.innerHTML = `💰 ${priceLevel}`;
+        if (addressElement) addressElement.classList.add('address');
+        if (timeElement) timeElement.innerHTML = `<i class="fas fa-clock"></i> ${closingTime}`;
+        if (priceElement) priceElement.innerHTML = `<i class="fas fa-dollar-sign"></i> ${priceLevel}`;
         
         // Load busyness data
         if (details.geometry && details.geometry.location) {
@@ -350,27 +352,22 @@ function updatePlaceCard(card, place, details, index) {
             </div>
         </div>
         <div class="place-info">
-            <div class="info-item">📍 ${place.formatted_address}</div>
-            <div class="info-item">🕒 Closes: ${closingTime}</div>
-            <div class="info-item">💰 ${getPriceLevel(details.price_level)}</div>
+            <div class="info-item address"><i class="fas fa-map-marker-alt"></i> ${place.formatted_address}</div>
+            <div class="info-item"><i class="fas fa-clock"></i> Closes: ${closingTime}</div>
+            <div class="info-item"><i class="fas fa-dollar-sign"></i> ${getPriceLevel(details.price_level)}</div>
             <div class="info-item">
                 <span class="busyness" id="busyness-${index}">Loading...</span>
             </div>
         </div>
         <div class="place-actions">
-            <button class="btn btn-primary" onclick="showPlaceDetails('${place.place_id}')">
-                View Details
+            <button class="btn btn-primary" onclick="togglePlaceSelection(${index})">
+                <i class="fas fa-plus"></i> Add
             </button>
-            <button class="btn btn-success" onclick="callPlace('${details.formatted_phone_number || ''}')">
-                📞 Call
+            <button class="btn btn-outline" onclick="callPlace('${details.formatted_phone_number || ''}')">
+                <i class="fas fa-phone"></i> Call
             </button>
-            <button class="btn btn-info" onclick="showBusynessChart('${place.place_id}')">
-                📊 Busyness
-            </button>
-            <button class="btn ${isSelected ? 'btn-warning' : 'btn-primary'}" 
-                    onclick="togglePlaceSelection(${index})"
-                    ${selectedPlaces.length >= 4 && !isSelected ? 'disabled' : ''}>
-                ${isSelected ? 'Remove' : 'Add to Compare'}
+            <button class="btn btn-outline" onclick="showPlaceDetails('${place.place_id}')">
+                <i class="fas fa-info-circle"></i> Details
             </button>
         </div>
     `;
@@ -391,7 +388,37 @@ function getClosingTime(openingHours) {
     if (!todayPeriod || !todayPeriod.close) return '24 Hours';
     
     const closeTime = todayPeriod.close.time;
-    return `${closeTime.substr(0,2)}:${closeTime.substr(2,2)}`;
+    const closeHour = parseInt(closeTime.substr(0, 2));
+    const closeMinute = parseInt(closeTime.substr(2, 2));
+    
+    // Create closing time for today
+    const now = new Date();
+    const closeTimeToday = new Date();
+    closeTimeToday.setHours(closeHour, closeMinute, 0, 0);
+    
+    // Calculate time difference
+    const timeDiff = closeTimeToday - now;
+    
+    if (timeDiff <= 0) {
+        return 'Closed :(';
+    }
+    
+    // Convert to hours and minutes
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    // Build the result string
+    let result = 'Closes in ';
+    if (hours > 0) {
+        result += `${hours} hour${hours !== 1 ? 's' : ''}`;
+        if (minutes > 0) {
+            result += ` ${minutes} min${minutes !== 1 ? 's' : ''}`;
+        }
+    } else if (minutes > 0) {
+        result += `${minutes} min${minutes !== 1 ? 's' : ''}`;
+    }
+    
+    return result;
 }
 
 function getPriceLevel(level) {
@@ -416,7 +443,7 @@ function togglePlaceSelection(index) {
 function updateComparisonSection() {
     elements.compareCount.textContent = selectedPlaces.length;
     elements.compareBtn.disabled = selectedPlaces.length === 0;
-    elements.refreshBtn.style.display = selectedPlaces.length > 0 ? 'block' : 'none';
+
     
     if (selectedPlaces.length > 0) {
         elements.comparisonSection.classList.remove('hidden');
@@ -459,26 +486,22 @@ function createComparisonCard(place, index) {
                 </div>
             </div>
             <div class="place-info">
-                <div class="info-item" id="travel-${index}">🚗 Calculating...</div>
-                <div class="info-item">📍 ${addressText}</div>
-                <div class="info-item">🕒 Closes: ${closingTime}</div>
-                <div class="info-item">💰 ${priceText}</div>
+                <div class="info-item" id="travel-${index}"><i class="fas fa-${transportMode === 'driving' ? 'car' : 'walking'}"></i> Calculating...</div>
+                <div class="info-item"><i class="fas fa-clock"></i> ${closingTime}</div>
+                <div class="info-item"><i class="fas fa-dollar-sign"></i> ${priceText}</div>
                 <div class="info-item">
                     <span class="busyness" id="compare-busyness-${index}">Loading...</span>
                 </div>
             </div>
             <div class="place-actions">
-                <button class="btn btn-primary" onclick="showPlaceDetails('${place.place_id}')">
-                    View Details
+                <button class="btn btn-outline" onclick="showPlaceDetails('${place.place_id}')">
+                    <i class="fas fa-info-circle"></i> Details
                 </button>
-                <button class="btn btn-success" onclick="callPlace('${phone}')">
-                    📞 Call
-                </button>
-                <button class="btn btn-info" onclick="showBusynessChart('${place.place_id}')">
-                    📊 Busyness
+                <button class="btn btn-outline" onclick="callPlace('${phone}')">
+                    <i class="fas fa-phone"></i> Call
                 </button>
                 <button class="btn btn-warning" onclick="removeFromComparison(${index})">
-                    Remove
+                    <i class="fas fa-times"></i> Remove
                 </button>
             </div>
         `;
@@ -517,20 +540,7 @@ function compareSelectedPlaces() {
     }, 2000);
 }
 
-function refreshComparison() {
-    if (selectedPlaces.length === 0) return;
-    
-    elements.refreshBtn.classList.add('loading');
-    
-    selectedPlaces.forEach((place, index) => {
-        loadBusynessData(place.place_id, `compare-busyness-${index}`);
-        calculateTravelTime(place.geometry.location, `travel-${index}`);
-    });
-    
-    setTimeout(() => {
-        elements.refreshBtn.classList.remove('loading');
-    }, 2000);
-}
+
 
 // API Functions
 function geocodeAddress(address) {
