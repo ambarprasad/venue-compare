@@ -8,6 +8,7 @@ body {
     font-family: 'DotGothic16', sans-serif;
     background: url('bg.webp') no-repeat center center fixed;
     background-size: cover;
+    background-attachment: fixed;
     color: #1a1a1a;
     line-height: 1.6;
     min-width: 0;
