@@ -16,57 +16,57 @@ body {
     position: relative;
 }
 
-/* Fixed background for all devices */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: url('bg.webp') no-repeat center center;
-    background-size: cover;
-    z-index: -1;
-    will-change: transform;
-    min-height: 100vh;
-    min-height: 100dvh;
-}
-
-/* Desktop: Keep traditional fixed background */
+/* Desktop background - works perfectly */
 @media (min-width: 769px) {
-    body::before {
+    body {
+        background: url('bg.webp') no-repeat center center fixed;
+        background-size: cover;
         background-attachment: fixed;
-        height: 100%;
     }
 }
 
-/* Mobile: Ensure proper fixed positioning */
+/* Mobile background - fixed positioning with extra coverage */
 @media (max-width: 768px) {
-    body::before {
-        background-attachment: scroll; /* Fallback for browsers that don't support fixed */
-        position: fixed; /* Keep it fixed */
-        height: 120vh; /* Extra height for iOS bounce scroll */
-        min-height:calc(100vh+200px);
-        
-    }
-    html, body {
-        min-height: 100vh;
-        min-height: 100dvh;
-    }
-    /* Ensure smooth scrolling on mobile */
+    /* Prevent any viewport resizing issues */
     html {
-        -webkit-overflow-scrolling: touch;
+        height: 100%;
+        overflow-x: hidden;
+    }
+    
+    body {
+        height: 100%;
+        position: relative;
+    }
+    
+    /* Background that never moves and covers everything */
+    body::before {
+        content: '';
+        position: fixed;
+        top: -100px;    /* Start above viewport */
+        left: -50px;    /* Start left of viewport */
+        right: -50px;   /* End right of viewport */
+        bottom: -100px; /* End below viewport */
+        width: calc(100% + 100px);  /* Extra width */
+        height: calc(100% + 200px); /* Extra height */
+        min-height: calc(100vh + 400px); /* Much more extra height */
+        background: url('bg.webp') no-repeat center center;
+        background-size: cover;
+        background-position: center center;
+        z-index: -1;
+        will-change: auto; /* Prevent hardware acceleration issues */
     }
 }
 
-/* iOS Safari specific fix */
-@supports (-webkit-appearance: none) and (not (color: rgb(0 0 0 / .5))) {
+/* iOS Safari specific fixes */
+@supports (-webkit-appearance: none) {
     @media (max-width: 768px) {
         body::before {
-            position: fixed;
-            top: 0;
-            height: 100vh;
-            background-attachment: local;
+            /* Even more coverage for iOS bounce scroll */
+            top: -200px;
+            bottom: -200px;
+            height: calc(100vh + 600px);
+            min-height: calc(100vh + 600px);
+            background-attachment: local; /* Better for iOS */
         }
     }
 }
