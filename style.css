@@ -3,6 +3,22 @@
     padding: 0;
     box-sizing: border-box;
 }
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* 2. For Firefox */
+html {
+  scrollbar-width: none; /* “auto” or “thin” to show; “none” hides */
+}
+
+/* 3. Ensure overflow remains scrollable */
+html,
+body {
+  overflow-y: scroll;  /* allows scrolling */
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+}
 
 
 body {
