@@ -10,7 +10,8 @@ body {
     background-size: cover;
     color: #1a1a1a;
     line-height: 1.6;
-    min-width: 360px;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 /* Font Utility Classes */
@@ -79,7 +80,6 @@ section {
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
-    margin-bottom: 1rem;
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
         0 4px 16px rgba(0, 0, 0, 0.2),
@@ -197,7 +197,6 @@ section {
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
         0 4px 16px rgba(0, 0, 0, 0.2);
-    margin-bottom: 1rem;
     border: 1px solid #333;
     color: #e0e0e0;
 }
@@ -214,7 +213,8 @@ section {
 .search-container {
     display: flex;
     gap: 8px;
-    
+    width: 100%;
+    max-width: 100%;
 }
 .search-btn{
     font-family: 'DotGothic16';
@@ -222,6 +222,7 @@ section {
 
 .search-container input {
     flex: 1;
+    min-width: 0; /* allow flex child to shrink on small screens */
     padding: 12px;
     border: 1px solid #333;
     border-radius: 12px;
@@ -241,6 +242,7 @@ section {
 }
 
 .search-container button {
+    flex-shrink: 0; /* keep button visible without forcing overflow */
     padding: 12px 16px;
     background: #73e8c1;
     color: #1a1a1a;
@@ -349,7 +351,7 @@ section {
 }
 
 .place-card {
-    background: rgba(42, 42, 42, 0.95);
+    background: rgba(255, 255, 255, 0.1);;
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -599,6 +601,9 @@ section {
 @media (max-width: 480px) {
     .header {
         padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     }
     
     .header h1 {
