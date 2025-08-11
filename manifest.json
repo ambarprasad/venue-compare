@@ -2,9 +2,9 @@
   "name": "Venue Compare",
   "short_name": "VenueCompare",
   "description": "Find and compare places with live busyness data",
-  "start_url": "/",
+  "start_url": "/venue-compare/index.html"
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#1a1a1a",
   "theme_color": "#2196F3",
   "orientation": "portrait-primary",
   "icons": [
