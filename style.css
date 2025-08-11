@@ -707,3 +707,16 @@ section {
         text-align: center;
     }
 }
+/* Ensure search result cards fill their container */
+.results-list .place-card {
+  width: 100%;
+  max-width: 600px;  /* or whatever max width your layout uses */
+  margin: 0 auto;    /* center if narrower than container */
+}
+
+/* Force comparison cards to the same width */
+.comparison-section .comparison-grid .place-card {
+  width: 100%;
+  max-width: 600px;  /* match the same max-width */
+  margin: 0 auto;
+}
