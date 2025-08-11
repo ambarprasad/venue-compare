@@ -712,6 +712,7 @@ section {
   width: 100%;
   max-width: 600px;  /* or whatever max width your layout uses */
   margin: 0 auto;    /* center if narrower than container */
+    margin-bottom: 1rem;
 }
 
 /* Force comparison cards to the same width */
