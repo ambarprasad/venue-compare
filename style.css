@@ -28,6 +28,8 @@ body::before {
     background-size: cover;
     z-index: -1;
     will-change: transform;
+    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* Desktop: Keep traditional fixed background */
@@ -43,10 +45,14 @@ body::before {
     body::before {
         background-attachment: scroll; /* Fallback for browsers that don't support fixed */
         position: fixed; /* Keep it fixed */
-        min-height: 100vh;
         height: 120vh; /* Extra height for iOS bounce scroll */
+        min-height:calc(100vh+200px);
+        
     }
-    
+    html, body {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
     /* Ensure smooth scrolling on mobile */
     html {
         -webkit-overflow-scrolling: touch;
